@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Share2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
@@ -17,9 +17,11 @@ export default function ProductClient({ product }: { product: Product }) {
   const { toast } = useToast();
   const { score, remarks } = calculateHealthScore(product);
 
+  const memoizedAddToHistory = useCallback(addToHistory, [product]);
+
   useEffect(() => {
-    addToHistory(product);
-  }, [product, addToHistory]);
+    memoizedAddToHistory(product);
+  }, [product, memoizedAddToHistory]);
 
   const productName = product.product_name_en || product.product_name || 'Unknown Product';
 
