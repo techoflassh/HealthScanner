@@ -9,7 +9,6 @@ import { calculateHealthScore } from '@/lib/health-score';
 import { Button } from '@/components/ui/button';
 import HealthScoreGauge from './HealthScoreGauge';
 import NutritionInfo from './NutritionInfo';
-import IngredientsAnalysis from './IngredientsAnalysis';
 import { Card, CardContent } from '../ui/card';
 import { useToast } from '@/hooks/use-toast';
 
@@ -78,8 +77,6 @@ export default function ProductClient({ product }: { product: Product }) {
             </Button>
         </CardContent>
       </Card>
-
-      <IngredientsAnalysis product={product} />
 
       <NutritionInfo product={product} />
     </div>
