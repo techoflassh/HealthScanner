@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { DietaryPreference, ScanHistoryItem, UserPreferences } from '@/lib/types';
 import { Product } from '@/lib/types';
 
@@ -61,7 +61,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  const addToHistory = (product: Product) => {
+  const addToHistory = useCallback((product: Product) => {
     setScanHistory(prevHistory => {
       const newItem: ScanHistoryItem = {
         barcode: product.code,
@@ -75,7 +75,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return newHistory;
     });
-  };
+  }, [isLoaded]);
 
   const clearHistory = () => {
     setScanHistory([]);
