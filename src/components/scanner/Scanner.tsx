@@ -46,8 +46,15 @@ export default function Scanner() {
         fps: 24,
         qrbox: { width: 250, height: 150 },
         supportedScanTypes: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E],
+        videoConstraints: {
+          facingMode: "environment",
+          focusMode: "continuous"
+        }
       };
-      html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId, { formatsToSupport: config.supportedScanTypes });
+      
+      if (!html5QrcodeRef.current) {
+        html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId, { formatsToSupport: config.supportedScanTypes });
+      }
 
       await html5QrcodeRef.current.start(
         { facingMode: "environment" },
@@ -77,12 +84,6 @@ export default function Scanner() {
   };
 
   useEffect(() => {
-    // This effect now only runs once to initialize the scanner object
-    // It doesn't start the scan automatically.
-    if (!html5QrcodeRef.current) {
-        html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId);
-    }
-    
     // Cleanup function to stop the scanner when the component unmounts
     return () => {
       stopScan();
@@ -91,7 +92,11 @@ export default function Scanner() {
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && html5QrcodeRef.current) {
+    if (file) {
+      // Ensure we have an instance before scanning
+      if (!html5QrcodeRef.current) {
+        html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId, { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E]});
+      }
       try {
         const decodedText = await html5QrcodeRef.current.scanFile(file, false);
         router.push(`/product/${decodedText}`);
@@ -112,7 +117,7 @@ export default function Scanner() {
   return (
     <Tabs defaultValue="scan" className="w-full" onValueChange={ (value) => {
         if (value === 'scan') {
-             startScan();
+             // startScan is called by the button now
         } else {
             stopScan();
         }
