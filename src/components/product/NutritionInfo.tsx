@@ -21,11 +21,11 @@ const nutrientMap = [
     { key: 'vitamin-c_100g', label: 'Vitamin C', unit: 'mg', icon: Droplets },
 ];
 
-const novaGroupMap: { [key: number]: string } = {
-    1: 'A: Unprocessed or minimally processed',
-    2: 'B: Processed culinary ingredients',
-    3: 'C: Processed foods',
-    4: 'D: Ultra-processed foods',
+const novaGroupMap: { [key: number]: {label: string, description: string} } = {
+    1: { label: 'Unprocessed', description: 'Unprocessed or minimally processed foods' },
+    2: { label: 'Processed Culinary', description: 'Processed culinary ingredients' },
+    3: { label: 'Processed', description: 'Processed foods' },
+    4: { label: 'Ultra-processed', description: 'Ultra-processed food and drink products' },
 };
 
 export default function NutritionInfo({ product }: { product: Product }) {
@@ -77,37 +77,36 @@ export default function NutritionInfo({ product }: { product: Product }) {
             </CardContent>
         </Card>
 
-        <Accordion type="single" collapsible className="w-full">
-            {(nova_group || nutriscore_grade) && (
-                <Card>
-                    <AccordionItem value="processing" className="border-b-0">
-                         <AccordionTrigger className="p-6">
-                            <CardTitle>Processing & Quality</CardTitle>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <CardContent className="space-y-4 pt-0">
-                                {nutriscore_grade && (
-                                    <div className="flex items-center gap-4">
-                                        <p className="font-semibold w-28">Nutri-Score</p>
-                                        <img
-                                            src={`https://static.openfoodfacts.org/images/misc/nutriscore-${nutriscore_grade}.svg`}
-                                            alt={`Nutri-Score ${nutriscore_grade.toUpperCase()}`}
-                                            className="h-10"
-                                        />
-                                    </div>
-                                )}
-                                {nova_group && (
-                                    <div className="flex items-center gap-4">
-                                        <p className="font-semibold w-28">NOVA Group</p>
-                                        <p className="text-sm">{novaGroupMap[nova_group] || `Unknown (${nova_group})`}</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Card>
-            )}
+        {(nova_group || nutriscore_grade) && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Processing & Quality</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {nutriscore_grade && (
+                        <div className="text-center p-4 rounded-lg bg-muted/50">
+                            <p className="text-sm font-semibold text-muted-foreground">NUTRI-SCORE</p>
+                            <img
+                                src={`https://static.openfoodfacts.org/images/misc/nutriscore-${nutriscore_grade}.svg`}
+                                alt={`Nutri-Score ${nutriscore_grade.toUpperCase()}`}
+                                className="h-14 mx-auto my-2"
+                            />
+                            <p className="text-lg font-bold">Grade {nutriscore_grade.toUpperCase()}</p>
+                        </div>
+                    )}
+                    {nova_group && (
+                         <div className="text-center p-4 rounded-lg bg-muted/50">
+                            <p className="text-sm font-semibold text-muted-foreground">NOVA GROUP</p>
+                            <p className="text-4xl font-bold my-2">{nova_group}</p>
+                            <p className="text-lg font-semibold">{novaGroupMap[nova_group]?.label || 'Unknown'}</p>
+                             <p className="text-sm text-muted-foreground">{novaGroupMap[nova_group]?.description || ''}</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        )}
 
+        <Accordion type="single" collapsible className="w-full">
             <Card>
                  <AccordionItem value="ingredients" className="border-b-0">
                     <AccordionTrigger className="p-6">
