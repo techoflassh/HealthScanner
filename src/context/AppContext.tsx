@@ -5,6 +5,8 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import type { DietaryPreference, ScanHistoryItem, UserPreferences } from '@/lib/types';
 import { Product } from '@/lib/types';
 
+type Theme = "light" | "dark";
+
 interface AppContextType {
   preferences: UserPreferences;
   setPreferences: (newPreferences: UserPreferences) => void;
@@ -12,6 +14,8 @@ interface AppContextType {
   scanHistory: ScanHistoryItem[];
   addToHistory: (product: Product) => void;
   clearHistory: () => void;
+  theme: Theme;
+  toggleTheme: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +27,7 @@ const defaultPreferences: UserPreferences = {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferencesState] = useState<UserPreferences>(defaultPreferences);
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
+  const [theme, setTheme] = useState<Theme>('light');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -34,6 +39,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const storedHistory = localStorage.getItem('nutriscan-history');
       if (storedHistory) {
         setScanHistory(JSON.parse(storedHistory));
+      }
+      const storedTheme = localStorage.getItem('nutriscan-theme') as Theme | null;
+       if (storedTheme) {
+        setTheme(storedTheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
       }
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
@@ -83,7 +94,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('nutriscan-history');
     }
   };
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
   
+  useEffect(() => {
+    if (isLoaded) {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        localStorage.setItem('nutriscan-theme', theme);
+    }
+  }, [theme, isLoaded]);
+
   useEffect(() => {
     if (isLoaded) {
         localStorage.setItem('nutriscan-preferences', JSON.stringify(preferences));
@@ -98,7 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <AppContext.Provider value={{ preferences, setPreferences, toggleDietaryRestriction, scanHistory, addToHistory, clearHistory }}>
+    <AppContext.Provider value={{ preferences, setPreferences, toggleDietaryRestriction, scanHistory, addToHistory, clearHistory, theme, toggleTheme }}>
       {children}
     </AppContext.Provider>
   );
