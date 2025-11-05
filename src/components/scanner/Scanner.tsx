@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,15 +42,16 @@ export default function Scanner() {
     
     try {
       await Html5Qrcode.getCameras();
-      html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId);
+      const config = {
+        fps: 24,
+        qrbox: { width: 250, height: 150 },
+        supportedScanTypes: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E],
+      };
+      html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId, { formatsToSupport: config.supportedScanTypes });
+
       await html5QrcodeRef.current.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: (viewfinderWidth, viewfinderHeight) => {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const qrboxSize = Math.floor(minEdge * 0.8);
-            return { width: qrboxSize, height: qrboxSize };
-          } 
-        },
+        config,
         (decodedText) => {
           router.push(`/product/${decodedText}`);
         },
@@ -76,6 +77,13 @@ export default function Scanner() {
   };
 
   useEffect(() => {
+    // This effect now only runs once to initialize the scanner object
+    // It doesn't start the scan automatically.
+    if (!html5QrcodeRef.current) {
+        html5QrcodeRef.current = new Html5Qrcode(qrcodeRegionId);
+    }
+    
+    // Cleanup function to stop the scanner when the component unmounts
     return () => {
       stopScan();
     };
@@ -104,7 +112,7 @@ export default function Scanner() {
   return (
     <Tabs defaultValue="scan" className="w-full" onValueChange={ (value) => {
         if (value === 'scan') {
-            startScan();
+             startScan();
         } else {
             stopScan();
         }
@@ -121,6 +129,14 @@ export default function Scanner() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="mt-2 text-sm text-muted-foreground">Requesting camera...</p>
+                </div>
+            )}
+             {scanState === 'idle' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 p-4">
+                    <Button onClick={startScan} className="animate-pulse">
+                        <Camera className="mr-2 h-5 w-5"/>
+                        Start Scanning
+                    </Button>
                 </div>
             )}
             {scanState === 'error' && (
