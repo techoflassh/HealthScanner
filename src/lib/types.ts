@@ -4,6 +4,17 @@ export interface UserPreferences {
   dietaryRestrictions: DietaryPreference[];
 }
 
+export interface Ingredient {
+  id: string;
+  percent_estimate: number;
+  percent_max: number;
+  percent_min: number;
+  rank: number;
+  text: string;
+  vegan?: 'yes' | 'no' | 'maybe';
+  vegetarian?: 'yes' | 'no' | 'maybe';
+}
+
 export interface Product {
   code: string;
   product_name: string;
@@ -13,6 +24,7 @@ export interface Product {
   nutriments: { [key: string]: number | string };
   ingredients_text_with_allergens_en?: string;
   ingredients_text: string;
+  ingredients: Ingredient[];
   additives_tags: string[];
   nova_group?: number;
   nutriscore_grade?: string;

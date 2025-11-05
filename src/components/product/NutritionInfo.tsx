@@ -28,7 +28,7 @@ const novaGroupMap: { [key: number]: string } = {
 };
 
 export default function NutritionInfo({ product }: { product: Product }) {
-  const { nutriments, ingredients_text_with_allergens_en, ingredients_text, nova_group, nutriscore_grade } = product;
+  const { nutriments, ingredients, nova_group, nutriscore_grade } = product;
 
   return (
     <div className="space-y-4">
@@ -102,9 +102,23 @@ export default function NutritionInfo({ product }: { product: Product }) {
                     </AccordionTrigger>
                     <AccordionContent>
                         <CardContent>
-                            <div className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none"
-                                dangerouslySetInnerHTML={{ __html: (ingredients_text_with_allergens_en || ingredients_text || 'No ingredients list available.').replace(/_/g, '') }}
-                            />
+                            {ingredients && ingredients.length > 0 ? (
+                                <div className="space-y-2">
+                                    {ingredients.map((ingredient) => (
+                                        <div key={ingredient.id}>
+                                            <div className="flex justify-between items-center text-sm">
+                                                <p className="capitalize">{ingredient.text.replace(/_/g, '')}</p>
+                                                <p className="font-semibold text-muted-foreground">
+                                                {ingredient.percent_estimate.toFixed(2)}%
+                                                </p>
+                                            </div>
+                                            <Separator className="my-2"/>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No ingredients list available.</p>
+                            )}
                         </CardContent>
                     </AccordionContent>
                 </AccordionItem>
